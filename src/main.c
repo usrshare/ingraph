@@ -49,6 +49,7 @@ int draw_columns() {
 	clear();
 
 
+	if (lineV) {
 	double curline = ceil(minV / lineV) * lineV;
 
 	while (curline <= maxV) {
@@ -70,6 +71,7 @@ int draw_columns() {
 			attroff(COLOR_PAIR(2));
 		}
 		curline += lineV;
+	}
 	}
 
 	mvprintw(0,0,"%.3f",maxV);
@@ -140,13 +142,16 @@ int main(int argc, char** argv) {
 
 	int opt = -1;
 
-	while ((opt = getopt(argc, argv, "m:M:a")) != -1) {
+	while ((opt = getopt(argc, argv, "m:M:l:a")) != -1) {
 		switch (opt) {
 			case 'm':
 				minV = strtod(optarg,NULL);
 				break;
 			case 'M':
 				maxV = strtod(optarg,NULL);
+				break;
+			case 'l':
+				lineV = strtod(optarg,NULL);
 				break;
 			case 'a':
 				acs_lines = true;
@@ -158,12 +163,15 @@ int main(int argc, char** argv) {
 						" -m : minimum value.\n"
 						" -M : maximum value.\n"
 						" -a : use ACS scanline characters.\n"
+						" -l : interval for horizontal lines. \n"
 						"\n"
 						,argv[0]);
 				exit(0);
 		}
 	}
 
+	if (maxV <= minV) {
+		fprintf(stderr,"Invalid minimum and maximum values.\n"); return 1;} 
 	//init ncurses
 
 	screen = initscr();
