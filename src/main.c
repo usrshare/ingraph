@@ -18,6 +18,7 @@ bool acs_lines = false;
 double minV = 0.0;
 double maxV = 1.0;
 double lineV = 1.0;
+int lineH = 0;
 
 double values[MAXCOL*MAXGRF];
 
@@ -48,30 +49,46 @@ int draw_columns() {
 
 	clear();
 
-
-	if (lineV) {
 	double curline = ceil(minV / lineV) * lineV;
 
-	while (curline <= maxV) {
+	if (lineH) {
+		int firstcol = (lineH - 1) - ((ccount-1) % lineH);
+		for (int iy = 0; iy < LINES; iy++ ) {
+			for (int ix = firstcol; ix < COLS; ix+= lineH) {
+				attron(COLOR_PAIR(2));
+				mvaddch(iy,ix,acs_lines ? ACS_VLINE : '|');
+				attroff(COLOR_PAIR(2));
 
-		double rowval = getrowval(curline);
-		int row = (LINES-1 - rowval);
-
-		if ( (row != 0) || (row != (LINES-1)) ) 
-			mvprintw(row,0,"%.3f",curline);
-
-		int rx = getcurx(screen);
-
-		int cchar = '-';
-		if (acs_lines) cchar = get_acsline(rowval);
-
-		for (int ix=rx; ix < COLS; ix++) {
-			attron(COLOR_PAIR(2));
-			mvaddch(row,ix,cchar);	
-			attroff(COLOR_PAIR(2));
+			}
 		}
-		curline += lineV;
 	}
+
+	if (lineV) {
+
+		while (curline <= maxV) {
+
+			double rowval = getrowval(curline);
+			int row = (LINES-1 - rowval);
+
+			if ( (row != 0) || (row != (LINES-1)) ) 
+				mvprintw(row,0,"%.3f",curline);
+
+			int rx = getcurx(screen);
+
+			int cchar = '-';
+			if (acs_lines) cchar = get_acsline(rowval);
+
+			for (int ix=rx; ix < COLS; ix++) {
+				attron(COLOR_PAIR(2));
+				if (lineH) {
+				mvaddch(row,ix,(((ix + ccount) % lineH) == 0) ? '+' : cchar);	
+				} else {
+				mvaddch(row,ix,cchar);	
+				}
+				attroff(COLOR_PAIR(2));
+			}
+			curline += lineV;
+		}
 	}
 
 	mvprintw(0,0,"%.3f",maxV);
@@ -142,13 +159,16 @@ int main(int argc, char** argv) {
 
 	int opt = -1;
 
-	while ((opt = getopt(argc, argv, "m:M:l:a")) != -1) {
+	while ((opt = getopt(argc, argv, "m:M:l:h:a")) != -1) {
 		switch (opt) {
 			case 'm':
 				minV = strtod(optarg,NULL);
 				break;
 			case 'M':
 				maxV = strtod(optarg,NULL);
+				break;
+			case 'h':
+				lineH = atoi(optarg);
 				break;
 			case 'l':
 				lineV = strtod(optarg,NULL);
@@ -163,7 +183,8 @@ int main(int argc, char** argv) {
 						" -m : minimum value.\n"
 						" -M : maximum value.\n"
 						" -a : use ACS scanline characters.\n"
-						" -l : interval for horizontal lines. \n"
+						" -h : interval for lines across the X axis. \n"
+						" -l : interval for lines across the Y axis. \n"
 						"\n"
 						,argv[0]);
 				exit(0);
