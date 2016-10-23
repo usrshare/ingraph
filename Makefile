@@ -8,7 +8,7 @@ CFLAGS=-std=c99 $(shell ncursesw5-config --cflags)
 LIBS=$(shell ncursesw5-config --libs) -lm
 DEFS=-D_POSIX_C_SOURCE=2
 
-_OBJS = main.o
+_OBJS = main.o graph_gen.o
 
 ifdef RELEASE
 DEFS += -O3 -DNDEBUG
