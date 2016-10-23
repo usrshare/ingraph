@@ -42,14 +42,12 @@ double getrowval(double val) {
 
 int draw_columns() {
 
-	unsigned int col_c = (ccount < COLS ? ccount : COLS);
+	unsigned int col_c = (ccount < COLS ? ccount : COLS); //columns to display
 
-	unsigned int curc = COLS-1;
-	unsigned int colsleft = col_c;
+	unsigned int curc = COLS-1; //current column
+	unsigned int colsleft = col_c; //columns left
 
 	clear();
-
-	double curline = ceil(minV / lineV) * lineV;
 
 	if (lineH) {
 		int firstcol = (lineH - 1) - ((ccount-1) % lineH);
@@ -64,6 +62,8 @@ int draw_columns() {
 	}
 
 	if (lineV) {
+
+		double curline = ceil(minV / lineV) * lineV;
 
 		while (curline <= maxV) {
 
@@ -98,6 +98,7 @@ int draw_columns() {
 	while (colsleft > 0) {
 
 		int thiscol = lastval - col_c + colsleft;
+		if (thiscol < 0) thiscol += MAXCOL; 
 
 		for (int i=0; i < graphs; i++) {
 
